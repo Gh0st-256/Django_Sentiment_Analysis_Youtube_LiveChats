@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.conf import settings
 import requests
+from isodate import parse_duration
 
 
 # Create your views here.
@@ -23,17 +24,33 @@ def index(request):
     results = r.json()['items']
 
     for result in results:
-        print(result['id']['videoId'])
+        video_ids.append(result['id']['videoId'])
 
     video_params = {
         'key': settings.YOUTUBE_DATA_API_KEY,
-        'part': 'snippet',
+        'part': 'snippet, contentDetails',
+        'maxResults': 9,
         'id': ','.join(video_ids)
 
     }
 
     r = requests.get(video_url, params=video_params)
 
-    print(r.text)
+    results = (r.json()['items'])
 
-    return render(request, 'index.html')
+    videos = []
+    for result in results:
+        video_data = {
+            'title': result['snippet']['title'],
+            'id': result['id'],
+            'duration': parse_duration(result['contentDetails']['duration']).total_seconds() // 60,
+            'thumbnail': result['snippet']['thumbnails']['high']['url']
+        }
+        videos.append(video_data)
+
+    context = {
+        'videos': videos
+
+    }
+
+    return render(request, 'index.html', context)
