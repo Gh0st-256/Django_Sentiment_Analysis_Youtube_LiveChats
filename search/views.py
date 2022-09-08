@@ -7,16 +7,33 @@ import requests
 
 def index(request):
     search_url = 'https://www.googleapis.com/youtube/v3/search'
+    video_url = 'https://www.googleapis.com/youtube/v3/videos'
 
-    params = {
+    search_params = {
         'part': 'snippet',
         'q': 'Sitting Parliament of Uganda',
         'key': settings.YOUTUBE_DATA_API_KEY,
-        'maxResults': 9
+        'maxResults': 9,
+        'type': 'video'
     }
 
     video_ids = []
-    r = requests.get(search_url, params=params)
-    print(r.json()['items'][0]['id']['videoId'])
+    r = requests.get(search_url, params=search_params)
+
+    results = r.json()['items']
+
+    for result in results:
+        print(result['id']['videoId'])
+
+    video_params = {
+        'key': settings.YOUTUBE_DATA_API_KEY,
+        'part': 'snippet',
+        'id': ','.join(video_ids)
+
+    }
+
+    r = requests.get(video_url, params=video_params)
+
+    print(r.text)
 
     return render(request, 'index.html')
