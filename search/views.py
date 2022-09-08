@@ -43,7 +43,7 @@ def index(request):
         video_data = {
             'title': result['snippet']['title'],
             'id': result['id'],
-            'duration': parse_duration(result['contentDetails']['duration']).total_seconds() // 60,
+            'duration': int(parse_duration(result['contentDetails']['duration']).total_seconds() // 60),
             'thumbnail': result['snippet']['thumbnails']['high']['url']
         }
         videos.append(video_data)
